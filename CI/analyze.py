@@ -31,11 +31,11 @@ for line in value_file:
     values.append(float(line.split(',')[-1]))
 plt.clf()
 pricedat = close.values # pull the 2D ndarray out of the pandas object
-pricedat = pricedat / pricedat[0,:]
+pricedat = pricedat[1:,:] / pricedat[0:-1, :] -1
 print pricedat
-base = values[0]
-for i in range(len(values)):
-    values[i] = values[i]/base
+#base = values[0]
+#for i in range(len(values)):
+#    values[i] = values[i]/base
 print values
 plt.plot(timestamps,pricedat)
 plt.plot(timestamps,values)
@@ -46,3 +46,12 @@ plt.ylabel('Adjusted Close')
 plt.xlabel('Date')
 savefig('adjustedclose.pdf',format='pdf')
 
+#daily_ret = (values[1:end]/values[0:-1])
+daily_ret = []
+daily_ret.append(1)
+
+for i in range(1,len(values)):
+    print i
+    daily_ret.append(values[i]/values[i-1]i -1)
+print daily_ret
+print daily_ret.std_dev()
