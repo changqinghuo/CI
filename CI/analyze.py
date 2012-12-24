@@ -17,41 +17,58 @@ symbols = []
 symbols.append(str(bechmark))
 
 dataobj = da.DataAccess('Yahoo')
-startday = dt.datetime(2011,1,1)
-endday = dt.datetime(2011,12,31)
+startday = dt.datetime(2008,1,1)
+endday = dt.datetime(2009,12,31)
 timeofday = dt.timedelta(hours=16)
 timestamps = du.getNYSEdays(startday, endday, timeofday)
 close = dataobj.get_data(timestamps, symbols, 'close')
 close = (close.fillna(method='ffill')).fillna(method='backfill')
 
 value_file = open(sys.argv[1])
-print sys.argv[1]
 values = []
 for line in value_file:
-    values.append(float(line.split(',')[-1]))
+    year = int(line.split(',')[0])
+    mon = int(line.split(',')[1])
+    day = int(line.split(',')[2])
+    value_date = dt.datetime(year, mon, day)
+    if value_date >= startday and value_date < endday:
+         values.append(float(line.split(',')[3]))
 plt.clf()
 pricedat = close.values # pull the 2D ndarray out of the pandas object
-pricedat = pricedat[1:,:] / pricedat[0:-1, :] -1
-print pricedat
+print len(pricedat)
+spx_dailyret_tmp = pricedat[1:,:] / pricedat[0:-1, :] -1
+spx_dailyret_tmp = np.ravel(spx_dailyret_tmp)
+spx_dailyret = []
+spx_dailyret.append(0)
+for val in spx_dailyret_tmp:
+    spx_dailyret.append(val)
+
+
 #base = values[0]
 #for i in range(len(values)):
 #    values[i] = values[i]/base
-print values
-plt.plot(timestamps,pricedat)
-plt.plot(timestamps,values)
-symbols = ['$SPX','Vaule']
-plt.legend(symbols)
-plt.ylabel('Adjusted Close')
+#plt.plot(timestamps,pricedat)
+#plt.plot(timestamps,values)
+#symbols = ['$SPX','Vaule']
+#plt.legend(symbols)
+#plt.ylabel('Adjusted Close')
+#plt.xlabel('Date')
+#savefig('adjustedclose.pdf',format='pdf')
 
-plt.xlabel('Date')
-savefig('adjustedclose.pdf',format='pdf')
-
-#daily_ret = (values[1:end]/values[0:-1])
 daily_ret = []
-daily_ret.append(1)
-
+daily_ret.append(0)
 for i in range(1,len(values)):
-    print i
-    daily_ret.append(values[i]/values[i-1]i -1)
-print daily_ret
-print daily_ret.std_dev()
+    daily_ret.append(values[i]/values[i-1] -1)
+#print 'portfolio daily return:', np.std(daily_ret, dtype = np.float64)
+print  'portfolio total return:', values[-1]/values[0]
+print  'portfolio daily return std:', np.std(daily_ret )
+print  'portfolio daily return mean:',np.mean(daily_ret)
+print  'portfolio daily return sharp ratio:', np.sqrt(len(daily_ret))*np.mean(daily_ret)/np.std(daily_ret, dtype = float64)
+
+print "==================="
+
+print  '$SPX total return:', pricedat[-1]/pricedat[0]
+print  '$SPX daily return std:', np.std(spx_dailyret)
+print  '$SPX daily return mean:', np.mean(spx_dailyret)
+print  '$SPX daily return sharp ratio:', np.sqrt(len(spx_dailyret))*np.mean(spx_dailyret)/np.std(spx_dailyret, dtype = float64)
+#print 'SPX daily return:', np.std(spx_dailyret, dtype = np.float64)
